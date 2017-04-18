@@ -8,9 +8,6 @@ import android.os.Looper;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by ditodoro on 4/1/2016.
- */
 public class PermissionService implements IPermissionListener, IPermissionService {
     private Map<String, String> _explanations;
     private IPermissionRequester _requester;
@@ -27,6 +24,18 @@ public class PermissionService implements IPermissionListener, IPermissionServic
     public void obtainPermission(String permission, String explanation) {
         _explanations.put(permission, explanation);
         _requester.obtainPermission(permission);
+    }
+
+    @Override
+    public void obtainPermissionIfNotGranted(String permission, String explanation) {
+        if(isPermissionGranted(permission) == false) {
+            this.obtainPermission(permission, explanation);
+        }
+    }
+
+    @Override
+    public boolean isPermissionGranted(String permission) {
+        return this.getPermissionStatus(permission) == IPermissionService.Status.Granted;
     }
 
     @Override
