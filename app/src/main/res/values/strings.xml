@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MagTune</string>
     <string name="explanation_bluetooth">We need permission to access Bluetooth in order to speak to your Arduino.</string>
+    <string name="explanation_bluetooth_admin">We need permission to administrate Bluetooth in order to speak to your Arduino.</string>
     <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
 </resources>

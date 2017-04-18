@@ -20,5 +20,9 @@ public class MainController {
         _permissionService.obtainPermissionIfNotGranted(
                 Manifest.permission.BLUETOOTH,
                 _stringResolver.getString(R.string.explanation_bluetooth));
+
+        _permissionService.obtainPermissionIfNotGranted(
+                Manifest.permission.BLUETOOTH_ADMIN,
+                _stringResolver.getString(R.string.explanation_bluetooth_admin));
     }
 }
