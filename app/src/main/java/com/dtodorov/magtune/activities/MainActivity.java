@@ -3,8 +3,12 @@ package com.dtodorov.magtune.activities;
 import android.bluetooth.BluetoothDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dtodorov.androlib.asyncIO.AsyncIOStream;
+import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
 import com.dtodorov.androlib.services.*;
 import com.dtodorov.magtune.R;
 import com.dtodorov.magtune.adapters.BluetoothDeviceAdapter;
@@ -13,6 +17,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -68,9 +73,39 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        ArrayList<BluetoothDevice> devices = bluetoothService.getBondedDevices();
+        final ArrayList<BluetoothConnectableDevice> devices = bluetoothService.getBondedDevices();
         BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(this, devices);
         ListView listView = (ListView) findViewById(R.id.lvDevices);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                BluetoothConnectableDevice device = devices.get(position);
+                AsyncIOStream stream = device.connect(new IAsyncIOListener()
+                {
+                    @Override
+                    public void onError(IOException e)
+                    {
+
+                    }
+
+                    @Override
+                    public void onReceived(byte[] buffer, int bytes)
+                    {
+
+                    }
+
+                    @Override
+                    public void onClosed()
+                    {
+
+                    }
+                }, 1024);
+                stream.write(new byte[] {'a', 'b', 'c'});
+            }
+
+        });
     }
 }

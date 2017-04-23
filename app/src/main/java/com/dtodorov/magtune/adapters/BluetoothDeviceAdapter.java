@@ -1,9 +1,6 @@
 package com.dtodorov.magtune.adapters;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.support.annotation.IdRes;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,13 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.dtodorov.androlib.services.BluetoothConnectableDevice;
 import com.dtodorov.magtune.R;
 
 import java.util.List;
 
-public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice>
+public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothConnectableDevice>
 {
-    public BluetoothDeviceAdapter(@NonNull Context context, @NonNull List<BluetoothDevice> devices)
+    public BluetoothDeviceAdapter(@NonNull Context context, @NonNull List<BluetoothConnectableDevice> devices)
     {
         super(context, 0, devices);
     }
@@ -30,7 +28,7 @@ public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice>
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        BluetoothDevice device = getItem(position);
+        BluetoothConnectableDevice connectableDevice = getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag
@@ -49,7 +47,7 @@ public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice>
         }
         // Populate the data from the data object via the viewHolder object
         // into the template view.
-        viewHolder.Name.setText(device.getName());
+        viewHolder.Name.setText(connectableDevice.getName());
 
         // Return the completed view to render on screen
         return convertView;

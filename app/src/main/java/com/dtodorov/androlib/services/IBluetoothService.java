@@ -1,46 +1,35 @@
 package com.dtodorov.androlib.services;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+
 import java.util.ArrayList;
 import java.util.Set;
 
-/**
- * Created by diman on 4/23/2017.
- */
 public interface IBluetoothService
 {
+    void onConnect();
+
     boolean hasBluetooth();
 
     boolean isEnabled();
 
-    BluetoothErrors getLastError();
+    void registerIOListener(IAsyncIOListener ioListener);
 
-    void registerDisconnectListener(IBluetoothDisconnectListener disconnectListener);
+    void clearIOListener();
 
     void enableBluetooth(IBluetoothEnableListener listener);
 
-    ArrayList<BluetoothDevice> getBondedDevices();
-
-    BluetoothSocket connect(String address);
-
-    void disconnect();
-
-    BluetoothSocket connect(BluetoothDevice device);
+    ArrayList<BluetoothConnectableDevice> getBondedDevices();
 
     IntentFilter getFilter();
 
     void onReceive(Context context, Intent intent);
 
-    public enum BluetoothErrors
-    {
-        NONE,
-        INVALID_DEVICE_ADDRESS,
-        FAILED_TO_CONNECT,
-        FAILED_TO_DISCONNECT
-    }
 }

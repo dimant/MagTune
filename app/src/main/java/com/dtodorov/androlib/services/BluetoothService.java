@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,16 +19,10 @@ import java.util.UUID;
 
 public class BluetoothService extends BroadcastReceiver implements IBluetoothService
 {
-
-    // common UUID for SPP, remains to be seen if it works
-    static final UUID _sppUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     private IIntentService _intentService;
-    private IBluetoothDisconnectListener _disconnectListener;
+    private IAsyncIOListener _ioListener;
 
     private BluetoothAdapter _adapter;
-    private BluetoothSocket _socket;
-    private BluetoothErrors _lastError = BluetoothErrors.NONE;
 
     public BluetoothService(IIntentService intentService)
     {
@@ -47,15 +43,15 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
     }
 
     @Override
-    public BluetoothErrors getLastError()
+    public void registerIOListener(IAsyncIOListener ioListener)
     {
-        return _lastError;
+        _ioListener = ioListener;
     }
 
     @Override
-    public void registerDisconnectListener(IBluetoothDisconnectListener disconnectListener)
+    public void clearIOListener()
     {
-        _disconnectListener = disconnectListener;
+        _ioListener = null;
     }
 
     @Override
@@ -82,79 +78,25 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
     }
 
     @Override
-    public ArrayList<BluetoothDevice> getBondedDevices()
+    public ArrayList<BluetoothConnectableDevice> getBondedDevices()
     {
-        ArrayList<BluetoothDevice> list = new ArrayList<>();
+        ArrayList<BluetoothConnectableDevice> list = new ArrayList<>();
 
         if(hasBluetooth())
         {
-            list.addAll(0, _adapter.getBondedDevices());
+            for(BluetoothDevice device : _adapter.getBondedDevices())
+            {
+                list.add(new BluetoothConnectableDevice(this, device));
+            }
         }
 
         return list;
     }
 
     @Override
-    public BluetoothSocket connect(String address)
+    public void onConnect()
     {
-        BluetoothDevice device = null;
-
-        try
-        {
-            device = _adapter.getRemoteDevice(address);
-        }
-        catch(IllegalArgumentException e)
-        {
-            _lastError = BluetoothErrors.INVALID_DEVICE_ADDRESS;
-        }
-
-        if(device != null)
-            return connect(device);
-        else
-            return null;
-    }
-
-    @Override
-    public void disconnect()
-    {
-        if(_socket != null)
-        {
-            try
-            {
-                _socket.close();
-            }
-            catch (IOException e)
-            {
-                _lastError = BluetoothErrors.FAILED_TO_DISCONNECT;
-            }
-
-            _socket = null;
-
-            if(_disconnectListener != null)
-            {
-                _disconnectListener.onDisconnected();
-            }
-        }
-    }
-
-    @Override
-    public BluetoothSocket connect(BluetoothDevice device)
-    {
-        disconnect();
-
-        try
-        {
-            _socket = device.createInsecureRfcommSocketToServiceRecord(_sppUUID);
-            _adapter.cancelDiscovery();
-            _socket.connect();
-        }
-        catch(IOException e)
-        {
-            _lastError = BluetoothErrors.FAILED_TO_CONNECT;
-        }
-
-        return _socket;
-
+        _adapter.cancelDiscovery();
     }
 
     @Override
@@ -171,9 +113,9 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
         if(
                 previousState == BluetoothAdapter.STATE_ON &&
                         state != BluetoothAdapter.STATE_ON &&
-                    _disconnectListener != null)
+                    _ioListener != null)
         {
-            _disconnectListener.onDisconnected();
+            _ioListener.onClosed();
         }
     }
 }
