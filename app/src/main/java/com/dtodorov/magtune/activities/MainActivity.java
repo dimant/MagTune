@@ -1,14 +1,20 @@
 package com.dtodorov.magtune.activities;
 
+import android.bluetooth.BluetoothDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ListView;
 
 import com.dtodorov.androlib.services.*;
 import com.dtodorov.magtune.R;
+import com.dtodorov.magtune.adapters.BluetoothDeviceAdapter;
 import com.dtodorov.magtune.controllers.MainController;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private MainController _mainController;
@@ -42,5 +48,29 @@ public class MainActivity extends AppCompatActivity {
         _mainController = new MainController(
                 stringResolver,
                 permissionService);
+
+        IBluetoothService bluetoothService = new BluetoothService(intentService);
+        if(bluetoothService.isEnabled() == false)
+        {
+            bluetoothService.enableBluetooth(new IBluetoothEnableListener()
+            {
+                @Override
+                public void onOk()
+                {
+
+                }
+
+                @Override
+                public void onCancelled()
+                {
+
+                }
+            });
+        }
+
+        ArrayList<BluetoothDevice> devices = bluetoothService.getBondedDevices();
+        BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(this, devices);
+        ListView listView = (ListView) findViewById(R.id.lvDevices);
+        listView.setAdapter(adapter);
     }
 }

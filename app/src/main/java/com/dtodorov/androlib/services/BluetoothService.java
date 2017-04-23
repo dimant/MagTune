@@ -10,19 +10,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class BluetoothService extends BroadcastReceiver {
-
-    public enum BluetoothErrors
-    {
-        NONE,
-        INVALID_DEVICE_ADDRESS,
-        FAILED_TO_CONNECT,
-        FAILED_TO_DISCONNECT
-    }
+public class BluetoothService extends BroadcastReceiver implements IBluetoothService
+{
 
     // common UUID for SPP, remains to be seen if it works
     static final UUID _sppUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -40,26 +34,31 @@ public class BluetoothService extends BroadcastReceiver {
         _adapter = BluetoothAdapter.getDefaultAdapter();
     }
 
+    @Override
     public boolean hasBluetooth()
     {
         return _adapter != null;
     }
 
+    @Override
     public boolean isEnabled()
     {
         return hasBluetooth() && _adapter.isEnabled();
     }
 
+    @Override
     public BluetoothErrors getLastError()
     {
         return _lastError;
     }
 
+    @Override
     public void registerDisconnectListener(IBluetoothDisconnectListener disconnectListener)
     {
         _disconnectListener = disconnectListener;
     }
 
+    @Override
     public void enableBluetooth(final IBluetoothEnableListener listener)
     {
         if(hasBluetooth() && !isEnabled())
@@ -82,18 +81,20 @@ public class BluetoothService extends BroadcastReceiver {
         }
     }
 
-    public Set<BluetoothDevice> getBondedDevices()
+    @Override
+    public ArrayList<BluetoothDevice> getBondedDevices()
     {
+        ArrayList<BluetoothDevice> list = new ArrayList<>();
+
         if(hasBluetooth())
         {
-            return _adapter.getBondedDevices();
+            list.addAll(0, _adapter.getBondedDevices());
         }
-        else
-        {
-            return new HashSet<BluetoothDevice>();
-        }
+
+        return list;
     }
 
+    @Override
     public BluetoothSocket connect(String address)
     {
         BluetoothDevice device = null;
@@ -113,6 +114,7 @@ public class BluetoothService extends BroadcastReceiver {
             return null;
     }
 
+    @Override
     public void disconnect()
     {
         if(_socket != null)
@@ -135,6 +137,7 @@ public class BluetoothService extends BroadcastReceiver {
         }
     }
 
+    @Override
     public BluetoothSocket connect(BluetoothDevice device)
     {
         disconnect();
@@ -154,6 +157,7 @@ public class BluetoothService extends BroadcastReceiver {
 
     }
 
+    @Override
     public IntentFilter getFilter()
     {
         return new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
