@@ -78,9 +78,9 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
     }
 
     @Override
-    public ArrayList<BluetoothConnectableDevice> getBondedDevices()
+    public ArrayList<IBluetoothConnectableDevice> getBondedDevices()
     {
-        ArrayList<BluetoothConnectableDevice> list = new ArrayList<>();
+        ArrayList<IBluetoothConnectableDevice> list = new ArrayList<>();
 
         if(hasBluetooth())
         {

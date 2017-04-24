@@ -26,7 +26,7 @@ public interface IBluetoothService
 
     void enableBluetooth(IBluetoothEnableListener listener);
 
-    ArrayList<BluetoothConnectableDevice> getBondedDevices();
+    ArrayList<IBluetoothConnectableDevice> getBondedDevices();
 
     IntentFilter getFilter();
 

@@ -9,6 +9,7 @@ import android.widget.ListView;
 
 import com.dtodorov.androlib.asyncIO.AsyncIOStream;
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+import com.dtodorov.androlib.asyncIO.IAsyncIOStream;
 import com.dtodorov.androlib.services.*;
 import com.dtodorov.magtune.R;
 import com.dtodorov.magtune.adapters.BluetoothDeviceAdapter;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        final ArrayList<BluetoothConnectableDevice> devices = bluetoothService.getBondedDevices();
+        final ArrayList<IBluetoothConnectableDevice> devices = bluetoothService.getBondedDevices();
         BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(this, devices);
         ListView listView = (ListView) findViewById(R.id.lvDevices);
         listView.setAdapter(adapter);
@@ -82,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                BluetoothConnectableDevice device = devices.get(position);
-                AsyncIOStream stream = device.connect(new IAsyncIOListener()
+                IBluetoothConnectableDevice device = devices.get(position);
+                IAsyncIOStream stream = device.connect(new IAsyncIOListener()
                 {
                     @Override
                     public void onError(IOException e)
@@ -103,9 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }, 1024);
-                stream.write(new byte[] {'a', 'b', 'c'});
             }
-
         });
     }
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class AsyncIOStream implements Runnable
+public class AsyncIOStream implements IAsyncIOStream
 {
     private final int _bufferSize;
     private final InputStream _inputStream;
@@ -42,7 +42,8 @@ public class AsyncIOStream implements Runnable
         }
     }
 
-    public void write(byte [] buffer)
+    @Override
+    public void write(byte[] buffer)
     {
         try
         {
@@ -54,6 +55,7 @@ public class AsyncIOStream implements Runnable
         }
     }
 
+    @Override
     public void close()
     {
         try

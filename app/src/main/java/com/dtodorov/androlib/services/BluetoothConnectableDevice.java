@@ -5,13 +5,14 @@ import android.bluetooth.BluetoothSocket;
 
 import com.dtodorov.androlib.asyncIO.AsyncIOStream;
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+import com.dtodorov.androlib.asyncIO.IAsyncIOStream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BluetoothConnectableDevice
+public class BluetoothConnectableDevice implements IBluetoothConnectableDevice
 {
     // common UUID for SPP, remains to be seen if it works
     static final UUID _sppUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -26,22 +27,26 @@ public class BluetoothConnectableDevice
         _bluetoothService = bluetoothService;
     }
 
+    @Override
     public boolean isConnected()
     {
         return _socket != null && _socket.isConnected();
     }
 
+    @Override
     public String getName()
     {
         return _device.getName();
     }
 
+    @Override
     public BluetoothSocket getSocket()
     {
         return _socket;
     }
 
-    public AsyncIOStream connect(final IAsyncIOListener ioListener, int bufferSize)
+    @Override
+    public IAsyncIOStream connect(final IAsyncIOListener ioListener, int bufferSize)
     {
         AsyncIOStream ioStream = null;
         InputStream inputStream = null;

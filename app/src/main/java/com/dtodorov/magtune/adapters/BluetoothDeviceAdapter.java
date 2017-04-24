@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.dtodorov.androlib.services.BluetoothConnectableDevice;
+import com.dtodorov.androlib.services.IBluetoothConnectableDevice;
 import com.dtodorov.magtune.R;
 
 import java.util.List;
 
-public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothConnectableDevice>
+public class BluetoothDeviceAdapter extends ArrayAdapter<IBluetoothConnectableDevice>
 {
-    public BluetoothDeviceAdapter(@NonNull Context context, @NonNull List<BluetoothConnectableDevice> devices)
+    public BluetoothDeviceAdapter(@NonNull Context context, @NonNull List<IBluetoothConnectableDevice> devices)
     {
         super(context, 0, devices);
     }
@@ -28,7 +28,7 @@ public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothConnectableDev
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        BluetoothConnectableDevice connectableDevice = getItem(position);
+        IBluetoothConnectableDevice connectableDevice = getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag
