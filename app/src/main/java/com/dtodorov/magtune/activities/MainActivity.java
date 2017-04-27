@@ -24,6 +24,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private MainController _mainController;
+    private IAsyncIOStream stream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 IBluetoothConnectableDevice device = devices.get(position);
-                IAsyncIOStream stream = device.connect(new IAsyncIOListener()
+                stream = device.connect(new IAsyncIOListener()
                 {
                     @Override
                     public void onError(IOException e)
@@ -104,7 +105,18 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 }, 1024);
-            }
+                while(true)
+                {
+                    stream.write(new byte[] {'h','i'});
+                    try
+                    {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+        }
         });
     }
 }
