@@ -15,7 +15,7 @@ public class IntentService implements IIntentService
 
         public int getNextCode()
         {
-            return _code++;
+            return ++_code;
         }
 
         public int getCode()

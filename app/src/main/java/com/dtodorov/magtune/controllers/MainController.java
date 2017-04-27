@@ -94,7 +94,7 @@ public class MainController {
                         @Override
                         public void onOk()
                         {
-                            _eventDispatcher.emit(IViewEventExtensions.ENABLE_VIEW, R.id.lvDevices);
+                            populateBTDeviceList();
                         }
 
                         @Override
@@ -105,12 +105,8 @@ public class MainController {
                         }
                     });
                 } else {
-                    _eventDispatcher.emit(IViewEventExtensions.ENABLE_VIEW, R.id.lvDevices);
+                    populateBTDeviceList();
                 }
-
-                // populate BT list
-                _devices = _bluetoothService.getBondedDevices();
-                _eventDispatcher.emit(MainController.ShowBoundedDevices, _devices);
             }
         };
 
@@ -205,5 +201,13 @@ public class MainController {
         if(_stateMachine.canFire(trigger)) {
             _stateMachine.fire(trigger);
         }
+    }
+
+    private void populateBTDeviceList()
+    {
+        // populate BT list
+        _devices = _bluetoothService.getBondedDevices();
+        _eventDispatcher.emit(MainController.ShowBoundedDevices, _devices);
+        _eventDispatcher.emit(IViewEventExtensions.ENABLE_VIEW, R.id.lvDevices);
     }
 }
