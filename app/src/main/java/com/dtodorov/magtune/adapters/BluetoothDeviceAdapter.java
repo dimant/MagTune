@@ -47,7 +47,8 @@ public class BluetoothDeviceAdapter extends ArrayAdapter<IBluetoothConnectableDe
         }
         // Populate the data from the data object via the viewHolder object
         // into the template view.
-        viewHolder.Name.setText(connectableDevice.getName());
+        String deviceName = connectableDevice.getName();
+        viewHolder.Name.setText(deviceName);
 
         // Return the completed view to render on screen
         return convertView;

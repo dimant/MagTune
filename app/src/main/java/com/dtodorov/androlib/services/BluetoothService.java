@@ -57,7 +57,7 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
     @Override
     public void enableBluetooth(final IBluetoothEnableListener listener)
     {
-        if(hasBluetooth() && !isEnabled())
+        if(hasBluetooth() && _adapter.isEnabled() == false)
         {
             _intentService.enactIntent(BluetoothAdapter.ACTION_REQUEST_ENABLE, new IIntentListener()
             {

@@ -3,11 +3,7 @@ package com.dtodorov.androlib.eventdispatcher;
 import android.app.Activity;
 import android.view.View;
 
-public class ViewEventExtensions {
-    public static final String ENABLE_VIEW = "enableView";
-    public static final String DISABLE_VIEW = "disableView";
-    public static final String HIDE_VIEW = "hideView";
-    public static final String SHOW_VIEW = "showView";
+public class ViewEventExtensions implements IViewEventExtensions {
 
     private Activity _activity;
 
@@ -16,6 +12,7 @@ public class ViewEventExtensions {
         _activity = activity;
     }
 
+    @Override
     public  void register(IEventDispatcher eventDispatcher)
     {
         eventDispatcher.register(ViewEventExtensions.HIDE_VIEW, new IEventListener() {

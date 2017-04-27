@@ -11,6 +11,8 @@ public class AsyncIOStream implements IAsyncIOStream
     private final OutputStream _outputStream;
     private final IAsyncIOListener _listener;
 
+    private boolean _isClosed = false;
+
     public AsyncIOStream(InputStream inputStream, OutputStream outputStream, IAsyncIOListener listener, int bufferSize)
     {
         _inputStream = inputStream;
@@ -56,6 +58,12 @@ public class AsyncIOStream implements IAsyncIOStream
     }
 
     @Override
+    public boolean isClosed()
+    {
+        return _isClosed;
+    }
+
+    @Override
     public void close()
     {
         try
@@ -67,6 +75,10 @@ public class AsyncIOStream implements IAsyncIOStream
         catch(IOException exception)
         {
             _listener.onError(exception);
+        }
+        finally
+        {
+            _isClosed = true;
         }
     }
 }

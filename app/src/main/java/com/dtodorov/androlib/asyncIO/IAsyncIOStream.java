@@ -8,5 +8,7 @@ public interface IAsyncIOStream extends Runnable
 {
     void write(byte[] buffer);
 
+    boolean isClosed();
+
     void close();
 }

@@ -18,13 +18,13 @@ public class Toaster implements IToaster {
     }
 
     @Override
-    public void Toast(int id)
+    public void toast(int id)
     {
-        this.Toast(_stringResolver.getString(id));
+        this.toast(_stringResolver.getString(id));
     }
 
     @Override
-    public void Toast(String text)
+    public void toast(String text)
     {
         Toast toast = Toast.makeText(_context, text, Toast.LENGTH_LONG);
         toast.show();
