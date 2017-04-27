@@ -11,6 +11,7 @@ import android.view.ViewDebug;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.dtodorov.androlib.asyncIO.AsyncIOStream;
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;

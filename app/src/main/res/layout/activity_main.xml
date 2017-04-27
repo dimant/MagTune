@@ -19,7 +19,9 @@
         <ListView
             android:id="@+id/lvDevices"
             android:layout_width="match_parent"
-            android:layout_height="300dp">
+            android:layout_height="300dp"
+            tools:layout_editor_absoluteY="0dp"
+            tools:layout_editor_absoluteX="8dp">
         </ListView>
 
         <LinearLayout
@@ -27,19 +29,64 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_left"
-                android:layout_width="150dp"
+            android:orientation="vertical">
+            <View
+                android:layout_marginTop="30dp"
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:background="#CCCCCC" />
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LEFT"/>
-
-            <Button
-                android:id="@+id/button_right"
-                android:layout_width="150dp"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_speed"/>
+                <Spinner
+                    android:id="@+id/spinner_speed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:entries="@array/speeds_array"/>
+            </LinearLayout>
+            <View
+                android:layout_marginBottom="30dp"
+                android:layout_width="fill_parent"
+                android:layout_height="1dip"
+                android:background="#CCCCCC" />
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="RIGHT"/>
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_left"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="LEFT"/>
+
+                <Button
+                    android:id="@+id/button_right"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="RIGHT"/>
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/button_disconnect"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="DISCONNECT"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

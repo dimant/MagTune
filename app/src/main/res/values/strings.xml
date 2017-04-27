@@ -7,4 +7,11 @@
     <string name="info_bluetooth_connected">Bluetooth connected.</string>
     <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
+    <string name="text_speed">Speed:</string>
+    <string-array name="speeds_array">
+        <item>slow</item>
+        <item>medium</item>
+        <item>fast</item>
+    </string-array>
+    <dimen name="font_size">24sp</dimen>
 </resources>
