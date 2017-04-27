@@ -78,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
                 new Toaster(context, stringResolver),
                 new BluetoothService(_intentService));
 
-
-
         ListView listView = (ListView) findViewById(R.id.lvDevices);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

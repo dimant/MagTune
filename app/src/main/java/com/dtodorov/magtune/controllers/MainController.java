@@ -145,6 +145,12 @@ public class MainController {
                                 fire(Trigger.Disconnect);
                             }
                         }, MainController.BluetoothBufferSize);
+
+                        if(_bluetoothStream != null)
+                        {
+                            _toaster.toast(R.string.info_bluetooth_connected);
+                            fire(Trigger.ConnectSuccess);
+                        }
                     }
                 })
                 .permit(Trigger.ConnectSuccess, State.Connected)
