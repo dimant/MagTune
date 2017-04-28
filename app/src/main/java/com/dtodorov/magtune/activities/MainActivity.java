@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -38,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private IEventDispatcher _eventDispatcher;
     private IViewEventExtensions _viewEventExtensions;
     private IIntentService _intentService;
-//    private IAsyncIOStream stream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +85,53 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 _mainController.fire(MainController.Trigger.Connect, position);
+            }
+        });
+
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_speed);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        Button buttonLeft = (Button) findViewById(R.id.button_left);
+        buttonLeft.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN: break;
+                    case MotionEvent.ACTION_UP: break;
+                }
+                return true;
+            }
+        });
+
+        Button buttonRight = (Button) findViewById(R.id.button_right);
+        buttonRight.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN: break;
+                    case MotionEvent.ACTION_UP: break;
+                }
+                return true;
+            }
+        });
+
+        Button buttonDisconnect = (Button) findViewById(R.id.button_disconnect);
+        buttonDisconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
