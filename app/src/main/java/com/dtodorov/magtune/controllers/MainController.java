@@ -89,8 +89,6 @@ public class MainController {
         _bluetoothService = bluetoothService;
         _magTuneParser = magTuneParser;
 
-        _rotationTimer = new Timer();
-
         _permissionService.obtainPermissionIfNotGranted(
                 Manifest.permission.BLUETOOTH,
                 _stringResolver.getString(R.string.explanation_bluetooth));
@@ -212,6 +210,7 @@ public class MainController {
             @Override
             public void callback(Object param) {
                 final int speed = (int) param;
+                _rotationTimer = new Timer();
                 TimerTask task = new TimerTask() {
                     @Override
                     public void run() {
@@ -230,6 +229,7 @@ public class MainController {
             @Override
             public void callback(Object param) {
                 final int speed = (int) param;
+                _rotationTimer = new Timer();
                 TimerTask task = new TimerTask() {
                     @Override
                     public void run() {
