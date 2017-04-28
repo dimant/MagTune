@@ -23,7 +23,7 @@ public class MagTuneParser implements IMagTuneParser {
     }
 
     public byte[] encodeRotation(Direction direction, Speed speed) {
-        int dir = direction == Direction.Left ? 0 : 1;
+        int dir = direction == Direction.Left ? -1 : 1;
         int rpm = 0;
         int steps = 0;
         String cmd;
@@ -31,20 +31,20 @@ public class MagTuneParser implements IMagTuneParser {
         switch(speed)
         {
             case Slow:
-                rpm = 60;
-                steps = 5;
+                rpm = 15;
+                steps = 15 * dir;
                 break;
             case Medium:
-                rpm = 120;
-                steps = 10;
+                rpm = 30;
+                steps = 30 * dir;
                 break;
             case Fast:
-                rpm = 240;
-                steps = 20;
+                rpm = 60;
+                steps = 60 * dir;
                 break;
         }
 
-        cmd = String.format("%d,%d,%d\r\n", dir, rpm, steps);
+        cmd = String.format("0,%d,%d\r\n", rpm, steps);
 
         return cmd.getBytes();
     }
