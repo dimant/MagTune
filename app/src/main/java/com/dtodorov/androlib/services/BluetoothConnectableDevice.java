@@ -2,10 +2,15 @@ package com.dtodorov.androlib.services;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import com.dtodorov.androlib.asyncIO.AsyncIOStream;
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+import com.dtodorov.androlib.asyncIO.IAsyncIOListenerSlot;
 import com.dtodorov.androlib.asyncIO.IAsyncIOStream;
+import com.dtodorov.magtune.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +24,7 @@ public class BluetoothConnectableDevice implements IBluetoothConnectableDevice
     private final IBluetoothService _bluetoothService;
     private final BluetoothDevice _device;
     private BluetoothSocket _socket;
+    private IAsyncIOListener _ioListener;
     private Runnable _ioThread;
 
     public BluetoothConnectableDevice(IBluetoothService bluetoothService, BluetoothDevice device)
@@ -67,37 +73,34 @@ public class BluetoothConnectableDevice implements IBluetoothConnectableDevice
 
         if(inputStream != null && outputStream != null)
         {
-            ioStream = new AsyncIOStream(inputStream, outputStream,
-                    new IAsyncIOListener()
-                    {
-                        @Override
-                        public void onError(IOException e)
-                        {
-                            ioListener.onError(e);
-                        }
-
-                        @Override
-                        public void onReceived(byte[] buffer, int bytes)
-                        {
-                            ioListener.onReceived(buffer, bytes);
-                        }
-
-                        @Override
-                        public void onClosed()
-                        {
-                            try
-                            {
-                                _socket.close();
-                                ioListener.onClosed();
-                            }
-                            catch(IOException exception)
-                            {
-                                ioListener.onError(exception);
-                            }
-                        }
-                    }, bufferSize);
+            ioStream = new AsyncIOStream(inputStream, outputStream, ioListener, bufferSize);
         }
 
         return ioStream;
+    }
+
+    @Override
+    public void registerIOListener(IAsyncIOListener ioListener)
+    {
+        _ioListener = ioListener;
+    }
+
+    @Override
+    public void clearIOListener()
+    {
+        _ioListener = null;
+    }
+
+    @Override
+    public IntentFilter getFilter() {
+        return new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if(_ioListener != null)
+        {
+            _ioListener.onClosed();
+        }
     }
 }

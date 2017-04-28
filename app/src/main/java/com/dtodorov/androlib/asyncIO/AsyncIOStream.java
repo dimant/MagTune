@@ -68,9 +68,12 @@ public class AsyncIOStream implements IAsyncIOStream
     {
         try
         {
-            _inputStream.close();
-            _outputStream.close();
-            _listener.onClosed();
+            if(_isClosed == false)
+            {
+                _inputStream.close();
+                _outputStream.close();
+                _listener.onClosed();
+            }
         }
         catch(IOException exception)
         {

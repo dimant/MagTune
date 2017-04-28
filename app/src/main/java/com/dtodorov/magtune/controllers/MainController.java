@@ -1,8 +1,6 @@
 package com.dtodorov.magtune.controllers;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
-import android.content.Intent;
 
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
 import com.dtodorov.androlib.asyncIO.IAsyncIOStream;
@@ -16,18 +14,27 @@ import com.dtodorov.androlib.services.IPermissionService;
 import com.dtodorov.androlib.services.IStringResolver;
 import com.dtodorov.androlib.services.IToaster;
 import com.dtodorov.magtune.R;
+import com.dtodorov.magtune.protocol.IMagTuneParser;
+import com.dtodorov.magtune.protocol.MagTuneParser;
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.delegates.Action;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainController {
 
     public static final String ShowBoundedDevices = "showBoundedBTDevices";
-    public static final String ClickedDevice = "clickedDevice";
 
-    private static int BluetoothBufferSize = 512; // bytes
+    public static final String RotateLeft = "rotateLeft";
+    public static final String RotateRight = "rotateRight";
+    public static final String RotateStop = "rotateStop";
+    public static final String Disconnect = "disconnect";
+
+    private static final int BluetoothBufferSize = 512; // bytes
+    private static final int BluetoothCommandPeriod = 300; // milliseconds
 
     private enum State
     {
@@ -44,30 +51,45 @@ public class MainController {
         Disconnect
     };
 
+    private enum DisconnectReason
+    {
+        UserIniated,
+        Unexpected
+    };
+
     private final IStringResolver _stringResolver;
     private final IPermissionService _permissionService;
     private StateMachine<State, Trigger> _stateMachine;
     private final IEventDispatcher _eventDispatcher;
     private final IToaster _toaster;
     private final IBluetoothService _bluetoothService;
+    private final IMagTuneParser _magTuneParser;
 
     // state
     private Object _triggerParam;
     private ArrayList<IBluetoothConnectableDevice> _devices;
+    private IBluetoothConnectableDevice _device;
     private IAsyncIOStream _bluetoothStream;
+    private DisconnectReason _disconnectReason;
+
+    private Timer _rotationTimer;
 
     public MainController(
             IStringResolver stringResolver,
             IPermissionService permissionService,
             IEventDispatcher eventDispatcher,
             IToaster toaster,
-            IBluetoothService bluetoothService)
+            IBluetoothService bluetoothService,
+            IMagTuneParser magTuneParser)
     {
         _stringResolver = stringResolver;
         _permissionService = permissionService;
         _eventDispatcher = eventDispatcher;
         _toaster = toaster;
         _bluetoothService = bluetoothService;
+        _magTuneParser = magTuneParser;
+
+        _rotationTimer = new Timer();
 
         _permissionService.obtainPermissionIfNotGranted(
                 Manifest.permission.BLUETOOTH,
@@ -118,13 +140,10 @@ public class MainController {
                 .onEntry(new Action() {
                     @Override
                     public void doIt() {
-                        // TODO: add error handling
-                        int position = (int) _triggerParam;
-
                         // start connection
                         // later on maybe make it its own thread so we can show a spinner
-                        IBluetoothConnectableDevice device = _devices.get(position);
-                        _bluetoothStream = device.connect(new IAsyncIOListener() {
+                        _device = (IBluetoothConnectableDevice) _triggerParam;
+                        IAsyncIOListener ioListener = new IAsyncIOListener() {
                             @Override
                             public void onError(IOException e) {
                                 _toaster.toast(e.getMessage());
@@ -142,9 +161,16 @@ public class MainController {
                             @Override
                             public void onClosed() {
                                 _toaster.toast(R.string.info_bluetooth_disconnected);
-                                fire(Trigger.Disconnect);
+                                if(_disconnectReason == DisconnectReason.Unexpected)
+                                {
+                                    fire(Trigger.Disconnect);
+                                }
                             }
-                        }, MainController.BluetoothBufferSize);
+                        };
+
+                        _bluetoothStream = _device.connect(ioListener, MainController.BluetoothBufferSize);
+                        _bluetoothService.registerIOListener(ioListener);
+                        _device.registerIOListener(ioListener);
 
                         if(_bluetoothStream != null)
                         {
@@ -154,8 +180,7 @@ public class MainController {
                     }
                 })
                 .permit(Trigger.ConnectSuccess, State.Connected)
-                .permit(Trigger.ConnectFail, State.HomeScreen)
-                .permit(Trigger.Disconnect, State.HomeScreen);
+                .permit(Trigger.ConnectFail, State.HomeScreen);
 
         _stateMachine.configure(State.Connected)
                 .onEntry(new Action() {
@@ -170,8 +195,9 @@ public class MainController {
                     @Override
                     public void doIt() {
                         // clean up connection infra
+                        _disconnectReason = DisconnectReason.UserIniated;
                         cleanup();
-
+                        _disconnectReason = DisconnectReason.Unexpected;
                         // disable motor controls
                         _eventDispatcher.emit(IViewEventExtensions.HIDE_VIEW, R.id.llMotorControls);
                         _eventDispatcher.emit(IViewEventExtensions.SHOW_VIEW, R.id.lvDevices);
@@ -180,14 +206,65 @@ public class MainController {
                 .permit(Trigger.Disconnect, State.HomeScreen);
 
         homeAction.doIt();
+
+
+        _eventDispatcher.register(MainController.RotateLeft, new IEventListener() {
+            @Override
+            public void callback(Object param) {
+                final int speed = (int) param;
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        _bluetoothStream.write(
+                                _magTuneParser.encodeRotation(
+                                        IMagTuneParser.Direction.Left,
+                                        _magTuneParser.intToSpeed(speed)));
+                    }
+                };
+
+                _rotationTimer.schedule(task, 0, BluetoothCommandPeriod);
+            }
+        });
+
+        _eventDispatcher.register(MainController.RotateRight, new IEventListener() {
+            @Override
+            public void callback(Object param) {
+                final int speed = (int) param;
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        _bluetoothStream.write(
+                                _magTuneParser.encodeRotation(
+                                        IMagTuneParser.Direction.Right,
+                                        _magTuneParser.intToSpeed(speed)));
+                    }
+                };
+
+                _rotationTimer.schedule(task, 0, BluetoothCommandPeriod);
+            }
+        });
+
+        _eventDispatcher.register(MainController.RotateStop, new IEventListener() {
+            @Override
+            public void callback(Object param) {
+                _rotationTimer.cancel();
+            }
+        });
     }
 
     private void cleanup()
     {
+        _rotationTimer.cancel();
+
         if(_devices != null)
         {
             _devices.clear();
         }
+
+        _device.clearIOListener();
+        _device = null;
+
+        _bluetoothService.clearIOListener();
 
         if(_bluetoothStream != null && _bluetoothStream.isClosed() == false)
         {

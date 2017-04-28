@@ -8,11 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+import com.dtodorov.androlib.asyncIO.IAsyncIOListenerSlot;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-public interface IBluetoothService
+public interface IBluetoothService extends IBroadcastIntentReceiver, IAsyncIOListenerSlot
 {
     void onConnect();
 
@@ -20,16 +21,7 @@ public interface IBluetoothService
 
     boolean isEnabled();
 
-    void registerIOListener(IAsyncIOListener ioListener);
-
-    void clearIOListener();
-
     void enableBluetooth(IBluetoothEnableListener listener);
 
     ArrayList<IBluetoothConnectableDevice> getBondedDevices();
-
-    IntentFilter getFilter();
-
-    void onReceive(Context context, Intent intent);
-
 }

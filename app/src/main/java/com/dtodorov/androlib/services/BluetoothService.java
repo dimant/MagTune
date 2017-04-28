@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
+import com.dtodorov.androlib.asyncIO.IAsyncIOListenerSlot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -111,8 +112,8 @@ public class BluetoothService extends BroadcastReceiver implements IBluetoothSer
         int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
         int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, 0);
         if(
-                previousState == BluetoothAdapter.STATE_ON &&
-                        state != BluetoothAdapter.STATE_ON &&
+                previousState == BluetoothAdapter.STATE_CONNECTED &&
+                        state != BluetoothAdapter.STATE_CONNECTED &&
                     _ioListener != null)
         {
             _ioListener.onClosed();

@@ -1,23 +1,17 @@
 package com.dtodorov.magtune.activities;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewDebug;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
-import com.dtodorov.androlib.asyncIO.AsyncIOStream;
-import com.dtodorov.androlib.asyncIO.IAsyncIOListener;
-import com.dtodorov.androlib.asyncIO.IAsyncIOStream;
 import com.dtodorov.androlib.eventdispatcher.EventDispatcher;
 import com.dtodorov.androlib.eventdispatcher.IEventDispatcher;
 import com.dtodorov.androlib.eventdispatcher.IEventListener;
@@ -27,15 +21,14 @@ import com.dtodorov.androlib.services.*;
 import com.dtodorov.magtune.R;
 import com.dtodorov.magtune.adapters.BluetoothDeviceAdapter;
 import com.dtodorov.magtune.controllers.MainController;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.dtodorov.magtune.protocol.MagTuneParser;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    private BroadcastReceiver _broadcastReceiverBluetoothService;
+    private BroadcastReceiver _broadcastReceiverBluetoothDevice;
+
     private MainController _mainController;
     private IEventDispatcher _eventDispatcher;
     private IViewEventExtensions _viewEventExtensions;
@@ -73,31 +66,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final IBluetoothService bluetoothService = new BluetoothService(_intentService);
+
+        _broadcastReceiverBluetoothService = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                bluetoothService.onReceive(context, intent);
+            }
+        };
+
+        registerReceiver(_broadcastReceiverBluetoothService, bluetoothService.getFilter());
+
         _mainController = new MainController(
                 stringResolver,
                 permissionService,
                 _eventDispatcher,
                 new Toaster(context, stringResolver),
-                new BluetoothService(_intentService));
+                bluetoothService,
+                new MagTuneParser());
 
-        ListView listView = (ListView) findViewById(R.id.lvDevices);
+        final ListView listView = (ListView) findViewById(R.id.lvDevices);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                _mainController.fire(MainController.Trigger.Connect, position);
-            }
-        });
-
-        Spinner spinner = (Spinner) findViewById(R.id.spinner_speed);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+                _mainController.fire(
+                        MainController.Trigger.Connect,
+                        listView.getItemAtPosition(position));
             }
         });
 
@@ -105,10 +99,17 @@ public class MainActivity extends AppCompatActivity {
         buttonLeft.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                Spinner spinner = (Spinner) findViewById(R.id.spinner_speed);
+                int speed = spinner.getSelectedItemPosition();
+
                 switch(event.getAction())
                 {
-                    case MotionEvent.ACTION_DOWN: break;
-                    case MotionEvent.ACTION_UP: break;
+                    case MotionEvent.ACTION_DOWN:
+                        _eventDispatcher.emit(MainController.RotateLeft, speed);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        _eventDispatcher.emit(MainController.RotateStop, null);
+                        break;
                 }
                 return true;
             }
@@ -118,10 +119,17 @@ public class MainActivity extends AppCompatActivity {
         buttonRight.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                Spinner spinner = (Spinner) findViewById(R.id.spinner_speed);
+                int speed = spinner.getSelectedItemPosition();
+
                 switch(event.getAction())
                 {
-                    case MotionEvent.ACTION_DOWN: break;
-                    case MotionEvent.ACTION_UP: break;
+                    case MotionEvent.ACTION_DOWN:
+                        _eventDispatcher.emit(MainController.RotateRight, speed);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        _eventDispatcher.emit(MainController.RotateStop, null);
+                        break;
                 }
                 return true;
             }
@@ -131,80 +139,15 @@ public class MainActivity extends AppCompatActivity {
         buttonDisconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-            }
+                _mainController.fire(MainController.Trigger.Disconnect);           }
         });
+    }
 
-//        GraphView graph = (GraphView) findViewById(R.id.graph);
-//        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[] {
-//                new DataPoint(0, 1),
-//                new DataPoint(1, 5),
-//                new DataPoint(2, 3),
-//                new DataPoint(3, 2),
-//                new DataPoint(4, 6)
-//        });
-//        graph.addSeries(series);
-//        if(bluetoothService.isEnabled() == false)
-//        {
-//            bluetoothService.enableBluetooth(new IBluetoothEnableListener()
-//            {
-//                @Override
-//                public void onOk()
-//                {
-//
-//                }
-//
-//                @Override
-//                public void onCancelled()
-//                {
-//
-//                }
-//            });
-//        }
-//
-//        final ArrayList<IBluetoothConnectableDevice> devices = bluetoothService.getBondedDevices();
-//        BluetoothDeviceAdapter adapter = new BluetoothDeviceAdapter(this, devices);
-//        ListView listView = (ListView) findViewById(R.id.lvDevices);
-//        listView.setAdapter(adapter);
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-//        {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-//            {
-//                IBluetoothConnectableDevice device = devices.get(position);
-//                stream = device.connect(new IAsyncIOListener()
-//                {
-//                    @Override
-//                    public void onError(IOException e)
-//                    {
-//
-//                    }
-//
-//                    @Override
-//                    public void onReceived(byte[] buffer, int bytes)
-//                    {
-//
-//                    }
-//
-//                    @Override
-//                    public void onClosed()
-//                    {
-//
-//                    }
-//                }, 1024);
-//                while(true)
-//                {
-//                    stream.write(new byte[] {'h','i'});
-//                    try
-//                    {
-//                        Thread.sleep(300);
-//                    } catch (InterruptedException e)
-//                    {
-//                        e.printStackTrace();
-//                    }
-//                }
-//        }
-//        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(_broadcastReceiverBluetoothService);
     }
 
     @Override
